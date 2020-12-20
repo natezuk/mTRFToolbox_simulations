@@ -18,7 +18,7 @@ snr = logspace(-1,-2.5,7); % signal to noise ratio in the response
 ntr = 2.^(2:6); % number of trials (must have at least two trials)
 trf_range = [-100 350]; % range of delays to include in the TRF estimate
 lambdas = 10.^(-2:8);
-niter = 50; % number of times to repeat the analysis with new simulated data
+niter = 100; % number of times to repeat the analysis with new simulated data
 nperm = 100; % number of times to shuffle the data and get null testing values
 
 % Load example EEG (taken from NeuroMusic)
