@@ -16,8 +16,8 @@ addpath('../mtrf/');
 dur = 180; % duration of the stimulus and response
 Fs = 128; % sampling frequency of the signals
 ntr = 20; % number of trials
-freq_range = [0.001 0.01]; % frequency range of the signals
-snr = 0.001; % signal to noise ratio in the response
+freq_range = [0.1 10]; % frequency range of the signals
+snr = 0.1; % signal to noise ratio in the response
 lambdas = [0 10.^(0:14)];
 nperm = 100; % number of times to shuffle the data and get null testing values
 quantiles_to_plot = [0.05 0.95];
