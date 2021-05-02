@@ -21,4 +21,4 @@ Also:
 
 [1]: https://github.com/mickcrosse/mTRF-Toolbox
 [2]: https://datadryad.org/stash/dataset/doi:10.5061/dryad.070jc
-[3]: 
+[3]: https://github.com/natezuk/mTRFToolbox_simulations/blob/main/ModelFit_vs_Acc.pdf
