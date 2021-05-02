@@ -13,11 +13,12 @@ However, there were a number of different simulations I ran in addition to this 
 * `Test_TRFestimate_SNRnTr_delta.m`: Similar to the "high frequency" simulation, but I used a frequency range corresponding to delta (0.1 - 4 Hz). I have also included the related data file and batch file. To plot the results, I would change the name of the data file loaded in `Plot_TRFestimate_SNRnTr.m`.
 * `Test_speechdataorig.m`: Inspired by the result that d-prime prediction accuracy could be used to validate the TRF model and its fit with the true model, I did forward envelope modeling of real EEG data collected during continuous speech listening (see the [Natural Speech dataset][2]) and looked at the model shapes as a function of d-prime prediction accuracy for one EEG channel (Fz). My hypothesis was that, if the models have good prediction accuracies, then they should look similar to each other if they represent real neural responses. I found that, for subjects with d-prime above 2, the models are similar, but for d-primes below 2 the models become more variable.
 
-The results from these simulations / analyses were included in an earlier version of Figure 3, which I have included in this repository for reference.
+The results from these simulations / analyses were included in an earlier version of Figure 3, which I have included in this repository for reference ([ModelFit_vs_Acc.pdf][3]).
 
 Also:
 
 * `LOO_nulltest_comparison.m`: LOO stands for "leave-one-out". Here, I was interested in examining how null distributions of prediction accuracies vary with the method of creating the null distribution. This was done in four different ways: 1) permute the testing trial, and compute null accuracy by pairing stimuli with true predictions (that is, calculated with the true model); 2) randomly circularly shift the stimulus in the testing trial, and compute null accuracy by pairing the shifted stimulus with the true prediction of the same trial; 3) permute all trials, but recalculate a new model on the permuted training trials before computing null accuracy (select the same lambda used for the true model); and 4) randomly circularly shift all trials, but recalculated a new model on the shifted training trials before computing null accuracy (using same lambda as true model). Our finding: it doesn't matter! The averages and variances of the null distributions are  comparable.
 
 [1]: https://github.com/mickcrosse/mTRF-Toolbox
-[2]:
+[2]: https://datadryad.org/stash/dataset/doi:10.5061/dryad.070jc
+[3]: 
