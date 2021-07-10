@@ -11,24 +11,24 @@
 % model and test
 % Nate Zuk (2020)
 
-addpath('../mtrf/');
+addpath('../mTRF-Toolbox/mtrf/'); % Change this to the path for the mtrf folder in the mTRF-Toolbox
 
 dur = 180; % duration of the stimulus and response
 Fs = 128; % sampling frequency of the signals
 ntr = 20; % number of trials
-freq_range = [0.1 10]; % frequency range of the signals
+freq_range = [5 7]; % frequency range of the signals
 snr = 0.1; % signal to noise ratio in the response
 lambdas = [0 10.^(0:14)];
-nperm = 100; % number of times to shuffle the data and get null testing values
+nperm = 500; % number of times to shuffle the data and get null testing values
 quantiles_to_plot = [0.05 0.95];
 % drift_mag = 10;
 
 %%% Generate a TRF model
-resp_dur = 250; % duration of the response (in ms)
+resp_dur = 350; % duration of the response (in ms)
 resp_t = (0:ceil(resp_dur/1000*Fs))/Fs;
 resp_frq = 6; % frequency of the response
 % the trf is an exponentially decaying sinusoid
-true_trf = sin(2*pi*resp_frq*resp_t).*exp(-resp_t/(resp_dur/1000/5));
+true_trf = sin(2*pi*resp_frq*resp_t).*exp(-resp_t/(resp_dur/1000/2));
 
 %%% Simulate low-frequency data, which requires regularization
 %%% There should be an embedded signal that is produced by convolution with
