@@ -11,12 +11,13 @@
 % model and test
 % Nate Zuk (2020)
 
-addpath('../mTRF-Toolbox/mtrf/'); % Change this to the path for the mtrf folder in the mTRF-Toolbox
+addpath('..');
+addpath('../../mTRF-Toolbox/mtrf/'); % Change this to the path for the mtrf folder in the mTRF-Toolbox
 
 dur = 180; % duration of the stimulus and response
 Fs = 128; % sampling frequency of the signals
 ntr = 20; % number of trials
-freq_range = [5 7]; % frequency range of the signals
+freq_range = [1 15]; % frequency range of the signals
 snr = 0.1; % signal to noise ratio in the response
 lambdas = [0 10.^(0:14)];
 nperm = 500; % number of times to shuffle the data and get null testing values
@@ -96,6 +97,9 @@ perm_i = tic;
 shuff_test_r = NaN(nperm,1);
 for n = 1:nperm
     % randomly pick two trials to pair for testing
+    % note: this includes correct pairings of trials (which produce high
+    % prediction accuracies), so you can get large positive error bars
+    % here
     shuff_test_tr = randi(ntr);
     shuff_mdl_tr = randi(ntr); 
     shuff_test_r(n) = corr(pred{shuff_mdl_tr},resp{test_tr});
