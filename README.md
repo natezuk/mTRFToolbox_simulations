@@ -4,7 +4,9 @@ The code in this repository is used to simulate the utility and test the effecti
 
 These simulations were coded while writing an upcoming review on linear modeling for EEG and the mTRF-Toolbox:
 
-> Crosse et al (in prep), "Linear modeling of neurophysiological responses to naturalistic stimuli: methodological considerations for applied research"
+> Crosse, Zuk, et al (2021), "Linear modeling of neurophysiological responses to naturalistic stimuli: methodological considerations for applied research". *Front Neurosci*, 15:705621. doi: [10.3389/fnins.2021.705621](https://doi.org/10.3389/fnins.2021.705621)
+
+You can run these simulations yourself using MATLAB Online: [![Open in MATLAB Online](https://www.mathworks.com/images/responsive/global/open-in-matlab-online.svg)](https://matlab.mathworks.com/open/github/v1?repo=natezuk/mTRFToolbox_simulations)
 
 Specifically, Figure 3 of that paper is the output of the code in `Plot_TRFestimate_SNRnTr.m` which plots the results of the "high frequency" simulation (2-15 Hz) that is run in `Test_TRFestimate_SNRnTr_highfreq.m`. The code takes a while to run, so I have included a data file containing the results of the simulation plotted in Figure 3: `TRFestimate_w_SNRnTr_highfreq.mat`. Because the program takes a while to run, I ran it on the BlueHive server at the University of Rochester, and I have included the batch file to run it (`Test_TRFestimate_highfreq.sh`).
 
