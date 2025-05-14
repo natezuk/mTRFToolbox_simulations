@@ -1,0 +1,8 @@
+# Ignore temporary files
+*~
+
+# Ignore fig folder
+fig/
+
+# Ignore results folders
+ns_env_res/

@@ -2,61 +2,62 @@
 % This computes a forward model using the envelope as input
 % Nate Zuk (2020)
 
-addpath('../mtrf-Toolbox/');
+addpath(genpath('../mTRF-Toolbox/'));
 
-sbj = 'Subject19'; % subject 10 has good data, d-prime performance > 4
+sbj = 19; % subject 10 has good data, d-prime performance > 4
     % Subject8 also ok, d-prime ~2
     % Subject5 good, d-prime ~3, but interesting TRF shape
-eegpth = ['/Volumes/Untitled/Natural Speech/EEG/' sbj '/'];
-stimpth = '/Volumes/Untitled/Natural Speech/Stimuli/Envelopes/';
+eegpth = 'C:\Users\zsxbo\Projects\cnsp-code\datasets\LalorNatSpeech\dataCND\';
+stimpth = '..\cnsp-code\datasets\LalorNatSpeech\dataCND\';
 Fs = 128; % sampling rate of envelope and EEG
 maxtr = 20; % maximum trial to include in the analysis
-chan = 85; % channel to use for prediction
+chan = 85; % channel to use for prediction (Fz)
 freq_range = [1 15]; % frequency range of the bandpass filter for the EEG
 nperm = 100;
 
 % Modeling parameters
-lambdas = 10.^(-2:8); % regularization parameters to test
+lambdas = [0 10.^(-2:8)]; % regularization parameters to test
 % lambdas = 10^18;
 tmin = -100;
 tmax = 350;
 map = 1; % compute forward direction
 t = floor(tmin/1000*Fs):ceil(tmax/1000*Fs);
 
-stims = cell(maxtr,1); % one for each trial
-EEGs = cell(maxtr,1);
-for n = 1:maxtr
-    fprintf('Run %d\n',n);
-    % load stimulus
-    sfl = sprintf('audio%d_128Hz',n);
-    Sd = load([stimpth sfl]);
-    stims{n} = Sd.env;
-    % load eeg data
-    efl = sprintf('%s_Run%d',sbj,n);
-    Ed = load([eegpth efl]);
-    % detrend and refrence data
-    ref = mean(Ed.mastoids,2);
-    eeg = Ed.eegData-ref*ones(1,128); % remove reference from mastoids
-    % Filter the EEG
-    % detrend
-    eeg = detrend(eeg(:,chan)); % remove linear trend
+% Load the stimulus envlope
+d = load([stimpth 'dataStim']);
+stims = d.stim.data(1,:); % contains the stimulus envelope on each trial
+clear d
+
+% Load the EEG for this participant
+eeg_d = load([eegpth sprintf('dataSub%d',sbj)]);
+EEGs = eeg_d.eeg.data;
+refs = eeg_d.eeg.extChan{1}.data; % reference electrodes (Mastoids)
+clear d
+
+% Do some very basic preprocessing on the data
+for n = 1:length(EEGs)
+    % reference to the average of the mastoids
+    ref_avg = mean(refs{n},2);
+    EEGs{n} = EEGs{n}-ref_avg;
+    % detrend linear slope
+    EEGs{n} = detrend(EEGs{n}(:,chan));
     % bandpass filter
-    eeg = eeg_bandpass(eeg,Fs,'highpass_cf',freq_range(1),'lowpass_cf',freq_range(2));
-    % Truncate stim and eeg to the same length
-    min_len = min([length(stims{n}) size(eeg,1)]);
-    stims{n} = stims{n}(1:min_len);
-    eeg = eeg(1:min_len,:); % set to the same length as the stimulus
-    % Transform into the principal components of the scalp topography
-    EEGs{n} = eeg;
-    % zscore the principal components
-    EEGs{n} = zscore(EEGs{n});
-    % zscore the stimulus -- to make the orig and new mTRFcrossval
-    % comparable
-    stims{n} = zscore(stims{n});
+    EEGs{n} = eeg_bandpass(EEGs{n},Fs,'highpass_cf',freq_range(1),'lowpass_cf',freq_range(2));
+    fprintf('Processed trial %d\n',n);
 end
 
-% Remove variables to save RAM
-clear eeg Sd Ed ref
+clear refs
+
+% Truncate so the stimulus and EEG is the same length
+for n = 1:maxtr
+    min_len = min([length(stims{n}) length(EEGs{n})]);
+    stims{n} = stims{n}(1:min_len);
+    EEGs{n} = EEGs{n}(1:min_len);
+    % normalize
+%     stims{n} = zscore([0; diff(stims{n})]); % by root mean square, so it stays positive
+    stims{n} = zscore(stims{n});
+    EEGs{n} = zscore(EEGs{n}); % z-score, so it is centered and std 1
+end
 
 % Use leave-one-trial-out to train and test the prediction model on 1
 % channel
@@ -124,8 +125,32 @@ if length(lambdas)>1 % if there is more than one lambda value, plot the CV tunin
     title(sprintf('%s, optimal lambda = %d',sbj,mode(opt_lmb)));
 end
 
+% Calculate SNR
+var_s = NaN(maxtr,1);
+var_n = NaN(maxtr,1);
+for n = 1:maxtr
+    var_s = var(pred{n});
+    var_n = var(EEGs{n});
+end
+SNR = 10*log10(mean(var_s)/mean(var_n));
+fprintf('SNR = %.1f\n',SNR);
+
+% Plot an example prediction and EEG
+figure
+set(gcf,'Position',[100 100 900 350]);
+hold on
+tstim = (0:length(pred{1})-1)/Fs;
+plot(tstim,EEGs{1},'k');
+hold on
+plot(tstim,pred{1},'r','LineWidth',1.5);
+set(gca,'XLim',[5,20]);
+xlabel('Time (s)');
+ylabel('Amplitude');
+legend('Original EEG','Prediction');
+exportgraphics(gca,sprintf('fig/ExamplePred1_sbj%d.pdf',sbj),'ContentType','vector');
+
 % Save the results
 svpth = 'ns_env_res/';
-svfl = sprintf('%s_frwdtrf',sbj);
+svfl = sprintf('Sbj%d_frwdtrf',sbj);
 save([svpth svfl],'all_mdl','opt_lmb','test_r','circ_test_r','mean_cv_r',...
-    'lambdas','chan','freq_range','maxtr','Fs','tmin','tmax');
+    'lambdas','chan','freq_range','maxtr','Fs','tmin','tmax','SNR');
