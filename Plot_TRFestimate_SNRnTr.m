@@ -3,11 +3,12 @@
 % Nate Zuk (2020)
 
 %addpath('../mTRF-toolbox/');
-%addpath('~/Documents/Matlab/shadedErrorBar/');
+U = userpath;
+addpath([U '/shadedErrorBar/']);
 
 % Load the data
 disp('Loading data...');
-sim_cond = 'highfreq'; % suffix defining the frequency range for the simulation
+sim_cond = 'delta'; % suffix defining the frequency range for the simulation
 load(sprintf('TRFestimate_w_SNRnTr_%s.mat',sim_cond));
 
 % Compute the true trf
@@ -35,7 +36,7 @@ end
 %% First, just plot the true model:
 figure
 set(gcf,'Position',[100 100,500,250]);
-plot(resp_t,true_trf,'LineWidth',2,'Color','k');
+plot(resp_t*1000,true_trf,'LineWidth',2,'Color','k');
 set(gca,'FontSize',14);
 xlabel('Delay (ms)');
 ylabel('True TRF');
@@ -56,6 +57,8 @@ for kk = 1:length(ntr)
             % issues
         mn_m = mean(total_mdl{kk}(:,:,jj)./mdl_rms,2);
         std_m = std(total_mdl{kk}(:,:,jj)./mdl_rms,[],2);
+%         mn_m = mean(total_mdl{kk}(:,:,jj),2);
+%         std_m = std(total_mdl{kk}(:,:,jj),[],2);
         pl = shadedErrorBar(lags/Fs*1000,mn_m,std_m/sqrt(niter),'lineProps',{'Color',cmap(clr_idx,:),'LineWidth',2});
         mdl_plt(jj+1) = pl.mainLine;
     end

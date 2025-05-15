@@ -4,7 +4,7 @@
 
 addpath(genpath('../mTRF-Toolbox/'));
 
-sbj = 19; % subject 10 has good data, d-prime performance > 4
+sbj = 10; % subject 10 has good data, d-prime performance > 4
     % Subject8 also ok, d-prime ~2
     % Subject5 good, d-prime ~3, but interesting TRF shape
 eegpth = 'C:\Users\zsxbo\Projects\cnsp-code\datasets\LalorNatSpeech\dataCND\';
