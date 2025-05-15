@@ -2,12 +2,13 @@
 % amount of data on d-prime and TRF estimate.
 % Nate Zuk (2020)
 
-addpath('../mtrf/');
-addpath('~/Documents/Matlab/shadedErrorBar/');
+%addpath('../mTRF-toolbox/');
+%addpath('~/Documents/Matlab/shadedErrorBar/');
 
 % Load the data
 disp('Loading data...');
-load('TRFestimate_w_SNRnTr_highfreq.mat');
+sim_cond = 'highfreq'; % suffix defining the frequency range for the simulation
+load(sprintf('TRFestimate_w_SNRnTr_%s.mat',sim_cond));
 
 % Compute the true trf
 resp_t = (0:ceil(resp_dur/1000*Fs))/Fs;
@@ -31,6 +32,15 @@ for jj = 1:length(snr)
     snr_lbl{jj} = sprintf('%d',20*log10(snr(jj)));
 end
 
+%% First, just plot the true model:
+figure
+set(gcf,'Position',[100 100,500,250]);
+plot(resp_t,true_trf,'LineWidth',2,'Color','k');
+set(gca,'FontSize',14);
+xlabel('Delay (ms)');
+ylabel('True TRF');
+exportgraphics(gca,sprintf('fig/TrueModel_%s.pdf',sim_cond),'ContentType','vector');
+
 %% Plot the true model and the model estimates for each number of trials
 figure
 set(gcf,'Position',[45,315,1200,385]);
@@ -51,7 +61,7 @@ for kk = 1:length(ntr)
     end
     set(gca,'FontSize',14);
     xlabel('Delay (ms)');
-    ylabel('TRF weight, normalized by RMS');
+    ylabel('TRF weight (RMS=1)');
     title(sprintf('%d trials',ntr(kk)));
 end
 legend(mdl_plt,[{'True model'}; snr_leg]);
@@ -83,17 +93,8 @@ end
 
 figure
 set(gcf,'Position',[45,315,1200,300]);
-subplot(1,3,1); % ** d-prime plot
-imagesc(1:length(snr),1:length(ntr),squeeze(median(dpr,1))');
-colorbar;
-caxis([0 5]);
-set(gca,'FontSize',14,'XTick',1:length(snr),'XTickLabel',snr_lbl,'XTickLabelRotation',45,...
-    'YTick',1:length(ntr),'YTickLabel',ntr);
-xlabel('SNR (dB)');
-ylabel('Number of trials');
-title('Median d-prime');
 
-subplot(1,3,2); % ** trf correlation
+subplot(1,3,1); % ** trf correlation
 imagesc(1:length(snr),1:length(ntr),squeeze(median(mdl_corr,1))');
 colorbar;
 caxis([0 1]);
@@ -103,7 +104,7 @@ xlabel('SNR (dB)');
 ylabel('Number of trials');
 title('Median correlation with true TRF');
 
-subplot(1,3,3); % average r value
+subplot(1,3,2); % average r value
 imagesc(1:length(snr),1:length(ntr),squeeze(median(mn_r,1))');
 colorbar;
 caxis([0 0.1]);
@@ -113,30 +114,59 @@ xlabel('SNR (dB)');
 ylabel('Number of trials');
 title('Median prediction accuracy');
 
+subplot(1,3,3); % ** d-prime plot
+imagesc(1:length(snr),1:length(ntr),squeeze(median(dpr,1))');
+colorbar;
+caxis([0 5]);
+set(gca,'FontSize',14,'XTick',1:length(snr),'XTickLabel',snr_lbl,'XTickLabelRotation',45,...
+    'YTick',1:length(ntr),'YTickLabel',ntr);
+xlabel('SNR (dB)');
+ylabel('Number of trials');
+title('Median d-prime');
+
+exportgraphics(gca,sprintf('fig/TRFcor_R_Dpr_%s.pdf',sim_cond),'ContentType','vector');
+
 % Collapse all conditions onto one plot, and correlation with true TRF for
 % various d-prime bins
 DPR = reshape(dpr,[numel(dpr),1]);
 MDL_CORR = reshape(mdl_corr,[numel(mdl_corr),1]);
 figure
-subplot(1,2,1)
 plot(DPR,MDL_CORR,'k.','MarkerSize',12);
 set(gca,'FontSize',14);
 xlabel('d-prime');
 ylabel('Correlation with true TRF');
 
-subplot(1,2,2) % plot each condition as a different color/size
+figure % plot each condition as a different color/size
+set(gcf,'Position',[100 100 800 600]);
 hold on
 ntr_sizes = [10 14 18 22 26]; % marker sizes for each # trials
 for kk = 1:length(ntr)
     for jj = 1:length(snr)
         clr_idx = get_color_idx(jj,length(snr),cmap);
         plot(dpr(:,jj,kk),mdl_corr(:,jj,kk),'.','Color',cmap(clr_idx,:),...
-            'MarkerSize',ntr_sizes(kk));
+            'MarkerSize',ntr_sizes(kk)*1.5);
     end
 end
-set(gca,'FontSize',14);
+set(gca,'FontSize',14,'XLim',[-2 6]);
 xlabel('d-prime');
 ylabel('Correlation with true TRF');
+exportgraphics(gca,sprintf('fig/DprvsTRFcorr_snrcolor_ntrsize_%s.pdf',sim_cond),'ContentType','vector');
+
+figure % plot each condition as a different color/size
+set(gcf,'Position',[100 100 800 600]);
+hold on
+ntr_sizes = [10 14 18 22 26]; % marker sizes for each # trials
+for kk = 1:length(ntr)
+    for jj = 1:length(snr)
+        clr_idx = get_color_idx(jj,length(snr),cmap);
+        plot(dpr(:,jj,kk),atanh(mdl_corr(:,jj,kk)),'.','Color',cmap(clr_idx,:),...
+            'MarkerSize',ntr_sizes(kk)*1.5);
+    end
+end
+set(gca,'FontSize',14,'XLim',[-2 6]);
+xlabel('d-prime');
+ylabel('Correlation with true TRF (Fisher transform)');
+exportgraphics(gca,sprintf('fig/DprvsTRFcorr_snrcolor_ntrsize-fisherz_%s.pdf',sim_cond),'ContentType','vector');
 
 % Plot model correlation vs r values
 R = reshape(mn_r,[numel(mn_r),1]);

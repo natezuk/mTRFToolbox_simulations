@@ -2,8 +2,9 @@
 % amount of data on d-prime and TRF estimate.
 % Nate Zuk (2020)
 
-addpath('../mtrf/');
-addpath('~/Documents/Matlab/shadedErrorBar/');
+addpath('../mTRF-toolbox/');
+% U = userpath;
+% addpath([U '/shadedErrorBar/']);
 
 % Load the data
 disp('Loading data...');
@@ -42,6 +43,7 @@ set(gca,'FontSize',14);
 xlabel('Prediction accuracy (Pearson''s r)');
 ylabel('Correlation with true TRF');
 legend(frqrange_leg);
+exportgraphics(gca,'fig/RvsTRFcorr_alldata.pdf','ContentType','vector');
 
 % Collapse all conditions onto one plot, and correlation with true TRF for
 % various d-prime bins
@@ -54,6 +56,7 @@ mdlcorr_qnt = NaN(nbins,2,2);
 [mdlcorr_md(:,2),mdlcorr_qnt(:,:,2),lf_dpr_bins,lf_nvals] = distr_by_xbins(DPR(:,2),MDL_CORR(:,2),...
     plot_quantiles,nbins);
 figure
+set(gcf,'Position',[100 100 650 500]);
 pl_mds = NaN(2,1);
 hold on
 cntr_hf = hf_dpr_bins(1:end-1)+diff(hf_dpr_bins)/2;
@@ -71,7 +74,8 @@ plot(cntr_lf,mdlcorr_qnt(:,2,2),'--','Color',frqcnd_clrs{2},'LineWidth',1.5);
 set(gca,'FontSize',14);
 xlabel('d-prime');
 ylabel(sprintf('Correlation with true TRF (median [%d%% %d%%])',plot_quantiles(1)*100,plot_quantiles(2)*100));
-legend(pl_mds,frqrange_leg);
+legend(pl_mds,frqrange_leg,'Location','southeast');
+exportgraphics(gca,'fig/DprvsTRFcorr.pdf','ContentType','vector');
 
 % Collapse all conditions onto one plot, and correlation with true TRF for
 % various Pearson's r bins
@@ -82,6 +86,7 @@ mdlcorr_r_qnt = NaN(nbins,2,2);
 [mdlcorr_r_md(:,2),mdlcorr_r_qnt(:,:,2),lf_r_bins] = distr_by_xbins(R(:,2),MDL_CORR(:,2),...
     plot_quantiles,nbins);
 figure
+set(gcf,'Position',[100 100 650 500]);
 pl_mds = NaN(2,1);
 hold on
 cntr_hf = hf_r_bins(1:end-1)+diff(hf_r_bins)/2;
@@ -99,4 +104,5 @@ plot(cntr_lf,mdlcorr_r_qnt(:,2,2),'--','Color',frqcnd_clrs{2},'LineWidth',1.5);
 set(gca,'FontSize',14);
 xlabel('Pearson''s r');
 ylabel(sprintf('Correlation with true TRF (median [%d%% %d%%])',plot_quantiles(1)*100,plot_quantiles(2)*100));
-legend(pl_mds,frqrange_leg);
+legend(pl_mds,frqrange_leg,'Location','southeast');
+exportgraphics(gca,'fig/RvsTRFcorr.pdf','ContentType','vector');
